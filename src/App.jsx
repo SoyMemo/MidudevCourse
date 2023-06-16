@@ -3,8 +3,9 @@
 import confetti from "canvas-confetti"
 import { useState } from "react"
 import { Square } from "./components/Square"
-import { TURNS, WINNER_COMBOS } from "./constants"
-
+import { TURNS } from "./constants"
+import { checkWinnerFrom, checkEndGame } from "./logic/board"
+import { WinnerModal } from "./components/winnerModal"
 
 function App() {
   const [board, setBoard] = useState(Array(9).fill(null))
@@ -13,19 +14,7 @@ function App() {
 
   const[winner, setWinner] = useState(null)
 
-  const checkWinner = (boardToCheck) => {
-    for(const combo of WINNER_COMBOS) {
-      const [a, b, c] = combo
-      if(
-        boardToCheck[a] &&
-        boardToCheck[a] === boardToCheck[b] &&
-        boardToCheck[a] === boardToCheck[c]
-      ){
-        return boardToCheck[a]
-      }
-    }
-    return null
-  }
+  
 
   const resetGame = () => {
     setBoard(Array(9).fill(null))
@@ -33,9 +22,7 @@ function App() {
     setWinner(null)
   }
 
-  const checkEndGame = (newBoard) => {
-    return newBoard.every((square) => square !== null)
-  }
+  
 
   const updateBoard = (index) => {
     const newBoard = [...board]
@@ -44,7 +31,7 @@ function App() {
     setBoard(newBoard)
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
-    const newWinner = checkWinner(newBoard)
+    const newWinner = checkWinnerFrom(newBoard)
     if(newWinner){
       confetti()
       setWinner(newWinner)
@@ -78,27 +65,7 @@ function App() {
         <Square isSelected={turn === TURNS.O}>{TURNS.O}</Square>
       </section>
       <section>
-        {
-          winner !== null && (
-            <section className = "winner">
-              <div className="text">
-                  <h2>
-                    {
-                      winner === false
-                      ? 'Empate'
-                      : 'Gano:'
-                    }
-                  </h2>
-                  <header className="win">
-                    {winner && <Square>{winner}</Square>}
-                  </header>
-                  <footer>
-                    <button onClick={resetGame}>Empezar de nuevo</button>
-                  </footer>
-              </div>
-            </section>
-          )
-        }
+      <WinnerModal resetGame= {resetGame} winner={winner}/>
       </section>
     </main>
   )
