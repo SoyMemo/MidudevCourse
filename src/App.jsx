@@ -8,7 +8,10 @@ import { checkWinnerFrom, checkEndGame } from "./logic/board"
 import { WinnerModal } from "./components/winnerModal"
 
 function App() {
-  const [board, setBoard] = useState(Array(9).fill(null))
+  const [board, setBoard] = useState(() => {
+    const boardFromStorage = window.localStorage.getItem('board')
+    if(boardFromStorage) return JSON.parse(boardFromStorage)
+    return Array(9).fill(null)})
   
   const [turn, setTurn] = useState(TURNS.X)
 
@@ -31,6 +34,8 @@ function App() {
     setBoard(newBoard)
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
+    window.localStorage.setItem('board', JSON.stringify(newBoard))
+    window.localStorage.setItem('turn', turn)
     const newWinner = checkWinnerFrom(newBoard)
     if(newWinner){
       confetti()
@@ -43,6 +48,7 @@ function App() {
   return (
     <main className='board'>
       <h1>TIC TAC TOE</h1>
+      <button onClick={resetGame}>Reset del juego!</button>
       <section className='game'>
         {
           board.map((_,index) => {
